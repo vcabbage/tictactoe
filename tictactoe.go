@@ -4,7 +4,7 @@ import "fmt"
 
 // Board is the state of the game
 //
-// Played positions are stored in the 9 left most of the 16 high order bits.
+// Played positions are stored in the 9 right most of the 16 high order bits.
 // The lower 16 bits is a mask of played positions.
 type Board uint32
 
