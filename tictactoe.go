@@ -4,8 +4,8 @@ import "fmt"
 
 // Board is the state of the game
 //
-// Played positions are stored in the 9 right most of the 16 high order bits.
-// The lower 16 bits is a mask of played positions.
+// X positions are stored in the 16 high order bits,
+// Y in the lower.
 type Board uint32
 
 // checks holds winning masks, generated at initial load
@@ -33,18 +33,16 @@ func generateCheckMasks() [8]uint16 {
 // IsWinner takes a Board and an 'X' or 'O' and returns whether
 // the player has won.
 func IsWinner(b Board, player byte) bool {
-	played := uint16(b >> 16) // extract high order bits
+	var played uint16
 
 	switch player {
 	case 'x', 'X':
+		played = uint16(b >> 16) // extract high order bits
 	case 'o', 'O':
-		played ^= 0xffff // if checking for 'O', invert the played positions
+		played = uint16(b)
 	default:
 		panic(fmt.Sprintf("player must be X or O, not %q", player))
 	}
-
-	// apply the mask to get the positions user has played
-	played &= uint16(b)
 
 	// try each of the 8 possible winning orientations
 	for _, check := range checks {
@@ -56,19 +54,16 @@ func IsWinner(b Board, player byte) bool {
 }
 
 // ArrayToBoard takes a 3x3 array of 'X's and 'O's
-// and returns a Board. Any elements other than 'X'
-// or 'O' are considered empty positions.
+// and returns a Board.
 func ArrayToBoard(a [3][3]byte) Board {
 	var b Board
 	for x, row := range a {
 		for y := range row {
 			switch a[x][y] {
 			case 'x', 'X':
-				bit := uint(x*3 + y)
-				b |= 1 << bit        // set position
-				b |= 1 << (bit + 16) // set mask
+				b |= 1 << (uint(x*3+y) + 16)
 			case 'o', 'O':
-				b |= 1 << uint(x*3+y) // set mask
+				b |= 1 << uint(x*3+y)
 			}
 		}
 	}
